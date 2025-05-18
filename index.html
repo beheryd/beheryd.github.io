@@ -6,14 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>David B Bio</title>
     <style>
-        body {
+        /* Reset and base styles */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
             overflow: hidden;
             background-color: #001f3f; /* Blue background */
             font-family: Arial, sans-serif;
+        }
+        
+        /* Flex container for the entire page */
+        .page-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             height: 100vh;
             width: 100vw;
+            position: relative;
         }
         
         #heatmap-canvas {
@@ -22,40 +37,40 @@
             left: 0;
             width: 100%;
             height: 100%;
+            z-index: 1;
         }
 
         #text-overlay {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            position: relative;
+            z-index: 10;
             color: white;
             font-family: "stevie-sans", sans-serif;
             font-weight: 100;
             font-style: italic;
             text-align: left;
+            width: 100%;
             max-width: 600px;
             padding: 20px;
-            z-index: 10;
             line-height: 1.6;
             text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             background-color: rgba(0, 0, 0, 0.25);
             border-radius: 10px;
+            /* Added for better readability on small screens */
+            margin: 0 20px;
         }
 
+        /* Responsive typography */
         h1 {
-            font-size: 3rem;
-            margin-bottom: 2rem;
+            font-size: clamp(2rem, 5vw, 3rem);
             font-weight: 100;
-            margin-top: 0; /* Remove the top margin completely */
-            margin-bottom: 2rem;
+            margin-top: 0;
+            margin-bottom: clamp(1rem, 3vw, 2rem);
         }
 
         p {
-            font-size: 1.2rem;
+            font-size: clamp(1rem, 2vw, 1.2rem);
             margin-bottom: 1rem;
         }
-        
         
         #text-overlay a {
             color: #80ccff; /* Light blue color for links */
@@ -68,10 +83,12 @@
             text-decoration: underline; /* Add underline on hover */
         }
 
+        /* Social links container using flexbox */
         #social-links {
-            margin-top: 2rem;
-            font-size: 1.1rem;
+            margin-top: clamp(1rem, 3vw, 2rem);
+            font-size: clamp(0.9rem, 1.5vw, 1.1rem);
             display: flex;
+            flex-wrap: wrap;
             gap: 15px;
         }
 
@@ -83,21 +100,38 @@
         #social-links a:hover {
             opacity: 1;
         }
+
+        /* Media queries for better responsiveness */
+        @media (max-width: 480px) {
+            #text-overlay {
+                padding: 15px;
+            }
+            
+            p {
+                margin-bottom: 0.8rem;
+            }
+            
+            #social-links {
+                margin-top: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <canvas id="heatmap-canvas"></canvas>
+    <div class="page-container">
+        <canvas id="heatmap-canvas"></canvas>
 
-    <div id="text-overlay">
-        <h1>I'm David B.</h1>
-        <p>I'm currently a <a href="https://kempnerinstitute.harvard.edu/" target="_blank">Kempner</a> post-bac scholar at Harvard.</p>
-        <p>I love learning about all kinds of intelligence— partly just because it's fascinating, and partly to help fill in the gaps where human brains fall short.</p>
-        <p>In the past, I have worked in the <a href="https://www.wedobrainstuff.com/" target="_blank">Keinath Lab</a> at UIC researching spatial memory and navigation.</p>
-        <p>Now I'm working within the <a href="https://gershmanlab.com/index.html" target="_blank">CCNLab</a> at Harvard researching intuitive physics.</p>
-        
-        <div id="social-links">
-            <a href="https://bsky.app/profile/dahery.bsky.social">BlueSky</a>
-            <a href="https://substack.com/@davidbehery?utm_campaign=unknown&utm_medium=web">Substack</a>
+        <div id="text-overlay">
+            <h1>I'm David B.</h1>
+            <p>I'm currently a <a href="https://kempnerinstitute.harvard.edu/" target="_blank">Kempner</a> post-bac scholar at Harvard.</p>
+            <p>I love learning about all kinds of intelligence— partly just because it's fascinating, and partly to help fill in the gaps where human brains fall short.</p>
+            <p>In the past, I have worked in the <a href="https://www.wedobrainstuff.com/" target="_blank">Keinath Lab</a> at UIC researching spatial memory and navigation.</p>
+            <p>Now I'm working within the <a href="https://gershmanlab.com/index.html" target="_blank">CCNLab</a> at Harvard researching intuitive physics.</p>
+            
+            <div id="social-links">
+                <a href="https://bsky.app/profile/dahery.bsky.social" target="_blank">BlueSky</a>
+                <a href="https://substack.com/@davidbehery?utm_campaign=unknown&utm_medium=web" target="_blank">Substack</a>
+            </div>
         </div>
     </div>
 
