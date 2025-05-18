@@ -1,1 +1,275 @@
-David Behery
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" href="https://use.typekit.net/grr6fkk.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Cursor Heatmap</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #001f3f; /* Blue background */
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        #heatmap-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #text-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-family: "stevie-sans", sans-serif;
+            font-weight: 100;
+            font-style: italic;
+            text-align: left;
+            max-width: 600px;
+            padding: 20px;
+            z-index: 10;
+            line-height: 1.6;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            font-weight: 100;
+            margin-top: 0; /* Remove the top margin completely */
+            margin-bottom: 2rem;
+        }
+
+        p {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        
+        #text-overlay a {
+            color: #80ccff; /* Light blue color for links */
+            text-decoration: none; /* Remove underline */
+            transition: color 0.3s ease; /* Smooth transition for hover effect */
+        }
+        
+        #text-overlay a:hover {
+            color: #ffffff; /* White on hover */
+            text-decoration: underline; /* Add underline on hover */
+        }
+
+        #social-links {
+            margin-top: 2rem;
+            font-size: 1.1rem;
+            display: flex;
+            gap: 15px;
+        }
+
+        #social-links a {
+            opacity: 0.8;
+            transition: opacity 0.3s ease;
+        }
+
+        #social-links a:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="heatmap-canvas"></canvas>
+
+    <div id="text-overlay">
+        <h1>I'm David B.</h1>
+        <p>I'm currently a <a href="https://kempnerinstitute.harvard.edu/" target="_blank">Kempner</a> post-bac scholar at Harvard.</p>
+        <p>I love learning about all kinds of intelligence— partly just because it's fascinating, and partly to help fill in the gaps where human brains fall short.</p>
+        <p>In the past, I have worked in the <a href="https://www.wedobrainstuff.com/" target="_blank">Keinath Lab</a> at UIC researching spatial memory and navigation.</p>
+        <p>Now I'm working within the <a href="https://gershmanlab.com/index.html" target="_blank">CCNLab</a> at Harvard researching intuitive physics.</p>
+        
+        <div id="social-links">
+            <a href="#" target="_blank">BlueSky</a>
+            <a href="#" target="_blank">Substack</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elements
+            const canvas = document.getElementById('heatmap-canvas');
+            
+            // Get the context
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to match window size perfectly
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                
+                // Redraw blue background
+                ctx.fillStyle = '#001f3f';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Recalculate grid dimensions
+                cols = Math.ceil(canvas.width / gridSize);
+                rows = Math.ceil(canvas.height / gridSize);
+                
+                // Create a new grid with new dimensions
+                const newHeatmapData = Array(rows).fill().map(() => Array(cols).fill(0));
+                
+                // Copy existing data where possible
+                if (heatmapData) {
+                    for (let y = 0; y < Math.min(heatmapData.length, rows); y++) {
+                        for (let x = 0; x < Math.min(heatmapData[0].length, cols); x++) {
+                            newHeatmapData[y][x] = heatmapData[y][x];
+                        }
+                    }
+                }
+                
+                heatmapData = newHeatmapData;
+            }
+            
+            // Create a data grid for the heatmap
+            const gridSize = 10; // Smaller grid size for more detail
+            let cols = Math.ceil(window.innerWidth / gridSize);
+            let rows = Math.ceil(window.innerHeight / gridSize);
+            let heatmapData = Array(rows).fill().map(() => Array(cols).fill(0));
+            
+            // Initial setup
+            canvas.style.width = '100%';
+            canvas.style.height = '100%';
+            resizeCanvas();
+            
+            // Mouse movement event
+            document.addEventListener('mousemove', (e) => {
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                
+                // Get center grid cell
+                const centerGridX = Math.floor(mouseX / gridSize);
+                const centerGridY = Math.floor(mouseY / gridSize);
+                
+                // Radial impact - affect cells in a radius around the cursor
+                const radius = 5; // Radius of impact in grid cells
+                
+                // Loop through all cells in a square around the cursor
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        const gridX = centerGridX + dx;
+                        const gridY = centerGridY + dy;
+                        
+                        // Check if the cell is within the grid bounds
+                        if (gridX >= 0 && gridX < cols && gridY >= 0 && gridY < rows) {
+                            // Calculate distance from cursor center (squared)
+                            const distSquared = dx * dx + dy * dy;
+                            
+                            // Only affect cells within the circular radius
+                            if (distSquared <= radius * radius) {
+                                // Calculate intensity based on distance from center
+                                // Closer = more intense, using inverse square falloff
+                                const intensity = 1.5 * (1 - Math.sqrt(distSquared) / radius);
+                                
+                                // Add heat to this cell
+                                heatmapData[gridY][gridX] += intensity;
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Window resize event
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Color mapping function (value to RGB color) - Blue to Red with more gradients
+            function getHeatColor(value) {
+                // Make the transition faster with a lower max value
+                const maxValue = 10;
+                const clampedValue = Math.min(value, maxValue) / maxValue;
+                
+                // Create a gradient: blue -> cyan -> green -> yellow -> orange -> red
+                let r, g, b;
+                
+                if (clampedValue < 0.2) {
+                    // Blue to Cyan
+                    const t = clampedValue / 0.2;
+                    r = 0;
+                    g = Math.floor(t * 255);
+                    b = 255;
+                } else if (clampedValue < 0.4) {
+                    // Cyan to Green
+                    const t = (clampedValue - 0.2) / 0.2;
+                    r = 0;
+                    g = 255;
+                    b = Math.floor(255 * (1 - t));
+                } else if (clampedValue < 0.6) {
+                    // Green to Yellow
+                    const t = (clampedValue - 0.4) / 0.2;
+                    r = Math.floor(t * 255);
+                    g = 255;
+                    b = 0;
+                } else if (clampedValue < 0.8) {
+                    // Yellow to Orange
+                    const t = (clampedValue - 0.6) / 0.2;
+                    r = 255;
+                    g = Math.floor(255 * (1 - t * 0.5));
+                    b = 0;
+                } else {
+                    // Orange to Red
+                    const t = (clampedValue - 0.8) / 0.2;
+                    r = 255;
+                    g = Math.floor(127 * (1 - t));
+                    b = 0;
+                }
+                
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+            
+            // Animation loop to render the heatmap
+            function animate() {
+                // Draw a semi-transparent blue background for fade effect
+                ctx.fillStyle = 'rgba(0, 31, 63, 0.1)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw the heatmap
+                for (let y = 0; y < rows; y++) {
+                    for (let x = 0; x < cols; x++) {
+                        const value = heatmapData[y][x];
+                        
+                        if (value > 0) {
+                            // Apply a decay to each cell
+                            heatmapData[y][x] *= 0.97;
+                            
+                            // Draw heatmap cell if it has a significant value
+                            if (value > 0.1) {
+                                ctx.fillStyle = getHeatColor(value);
+                                ctx.globalAlpha = Math.min(0.9, value / 15);
+                                // Draw squares
+                                ctx.fillRect(
+                                    x * gridSize, 
+                                    y * gridSize, 
+                                    gridSize, 
+                                    gridSize
+                                );
+                                ctx.globalAlpha = 1.0;
+                            }
+                        }
+                    }
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            
+            // Start the animation
+            animate();
+        });
+    </script>
+</body>
+</html>
