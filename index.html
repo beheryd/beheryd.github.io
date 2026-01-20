@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<! DOCTYPE html>
 <html lang="en">
 <head>
     <link rel="shortcut icon" href="dbicon.png" type="image/x-icon">
@@ -18,7 +18,7 @@
 
         html, body {
             height: 100%;
-            width: 100%;
+            width:  100%;
             overflow: hidden;
             background-color: #001f3f; /* bluee */
             font-family: Arial, sans-serif;
@@ -75,7 +75,7 @@
         
         #text-overlay a {
             color: #80ccff; /* light blue */
-            text-decoration: none;
+            text-decoration:  none;
             transition: color 0.3s ease;
         }
         
@@ -122,15 +122,15 @@
 
         <div id="text-overlay">
             <h1>I'm David Behery</h1>
-            <p>I'm currently a <a href="https://kempnerinstitute.harvard.edu/" target="_blank">Kempner</a> post-bac scholar at Harvard.</p>
+            <p>I'm currently a <a href="https://kempnerinstitute.harvard.edu/" target="_blank">Kempner</a> post-bac scholar at Harvard. </p>
             <p>I love learning about all kinds of intelligence— partly just because it's fascinating, and partly to help fill in the gaps where humans fall short.</p>
-            <p>Recently, I've been thinking about the ways we build theories of intuitive theories. How do we come to know ourselves? How much of 'us' can we know? Can knowing our intuitive theories of the world assist in forming learned theories of the world?</p>
-            <p>In the past, I have worked in the <a href="https://www.wedobrainstuff.com/" target="_blank">Keinath Lab</a> at UIC researching spatial memory and navigation.</p>
+            <p>Recently, I've been thinking about the ways we build theories of intuitive theories. Can knowing one's own intuitive theories help to form formal theories? How do we come to know ourselves? How much of 'us' can we know? 
+            <p>In the past, I have worked in the <a href="https://www.wedobrainstuff.com/" target="_blank">Keinath Lab</a> at UIC researching spatial memory and navigation. </p>
             <p>Now I'm working within the <a href="https://gershmanlab.com/index.html" target="_blank">CCNLab</a> at Harvard researching intuitive physics.</p>
             
             <div id="social-links">
                 <a href="https://bsky.app/profile/dahery.bsky.social">BlueSky</a>
-                <a href="https://substack.com/@davidbehery?utm_campaign=unknown&utm_medium=web" >Substack</a>
+                <a href="https://substack.com/@davidbehery? utm_campaign=unknown&utm_medium=web" >Substack</a>
                 <a href="mailto:davidbehery@g.harvard.edu">Email</a>
                 <a href="https://scholar.google.com/citations?user=0WcXy_wAAAAJ&hl=en&oi=ao">Google Scholar</a>
             </div>
@@ -143,12 +143,32 @@
             const canvas = document.getElementById('heatmap-canvas');
             
             // get context
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas. getContext('2d');
+            
+            // Classic_16 Cubehelix palette from palettable
+            const classic16Palette = [
+                [0, 0, 0],
+                [22, 10, 34],
+                [24, 32, 68],
+                [16, 62, 83],
+                [14, 94, 74],
+                [35, 116, 51],
+                [80, 125, 35],
+                [138, 122, 45],
+                [190, 117, 85],
+                [218, 121, 145],
+                [219, 138, 203],
+                [204, 167, 240],
+                [191, 201, 251],
+                [195, 229, 244],
+                [220, 246, 239],
+                [255, 255, 255]
+            ];
             
             // set canvas size to match window size
             function resizeCanvas() {
                 canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+                canvas.height = window. innerHeight;
                 
                 // redraw blue background
                 ctx.fillStyle = '#001f3f';
@@ -156,7 +176,7 @@
                 
                 // recompute grid dimensions
                 cols = Math.ceil(canvas.width / gridSize);
-                rows = Math.ceil(canvas.height / gridSize);
+                rows = Math. ceil(canvas.height / gridSize);
                 
                 // a new grid with new dimensions
                 const newHeatmapData = Array(rows).fill().map(() => Array(cols).fill(0));
@@ -223,55 +243,23 @@
             // window resize event
             window.addEventListener('resize', resizeCanvas);
             
-            // color mapping function (value to RGB color) - blue to red with more gradients
+            // color mapping function using classic_16 cubehelix palette
             function getHeatColor(value) {
-                // make the transition faster with a lower max value
+                // normalize value to palette index (0-15)
                 const maxValue = 5;
                 const clampedValue = Math.min(value, maxValue) / maxValue;
+                const index = Math.floor(clampedValue * (classic16Palette.length - 1));
                 
-                // create a gradient: blue -> cyan -> green -> yellow -> orange -> red
-                let r, g, b;
-                
-                if (clampedValue < 0.2) {
-                    // blue to cyan
-                    const t = clampedValue / 0.2;
-                    r = 0;
-                    g = Math.floor(t * 255);
-                    b = 255;
-                } else if (clampedValue < 0.4) {
-                    // dyan to green
-                    const t = (clampedValue - 0.2) / 0.2;
-                    r = 0;
-                    g = 255;
-                    b = Math.floor(255 * (1 - t));
-                } else if (clampedValue < 0.6) {
-                    // green to yellow
-                    const t = (clampedValue - 0.4) / 0.2;
-                    r = Math.floor(t * 255);
-                    g = 255;
-                    b = 0;
-                } else if (clampedValue < 0.8) {
-                    // yellow to orange
-                    const t = (clampedValue - 0.6) / 0.2;
-                    r = 255;
-                    g = Math.floor(255 * (1 - t * 0.5));
-                    b = 0;
-                } else {
-                    // orange to red
-                    const t = (clampedValue - 0.8) / 0.2;
-                    r = 255;
-                    g = Math.floor(127 * (1 - t));
-                    b = 0;
-                }
-                
-                return `rgb(${r}, ${g}, ${b})`;
+                // get the color from the palette
+                const color = classic16Palette[index];
+                return `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
             }
             
             // animation loop to render the heatmap
             function animate() {
                 // draw a semi-transparent blue background for fade effect
                 ctx.fillStyle = 'rgba(0, 31, 63, 0.1)';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillRect(0, 0, canvas. width, canvas.height);
                 
                 // draw the heatmap
                 for (let y = 0; y < rows; y++) {
@@ -293,7 +281,7 @@
                                     gridSize, 
                                     gridSize
                                 );
-                                ctx.globalAlpha = 1.0;
+                                ctx.globalAlpha = 1. 0;
                             }
                         }
                     }
