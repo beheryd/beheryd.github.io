@@ -20,7 +20,7 @@
             height: 100%;
             width:  100%;
             overflow: hidden;
-            background-color: #001f3f; /* bluee */
+            background-color: #000000; /* black */
             font-family: Arial, sans-serif;
         }
         
@@ -170,8 +170,8 @@
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
                 
-                // redraw blue background
-                ctx.fillStyle = '#001f3f';
+                // redraw black background
+                ctx.fillStyle = '#000000';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 // recompute grid dimensions
@@ -213,7 +213,7 @@
                 const centerGridY = Math.floor(mouseY / gridSize);
                 
                 // radial impact - affect cells in a radius around the cursor
-                const radius = 10; // radius of impact in grid cells
+                const radius = 8; // radius of impact in grid cells
                 
                 // loop through all cells in a square around the cursor
                 for (let dy = -radius; dy <= radius; dy++) {
@@ -258,7 +258,7 @@
             // animation loop to render the heatmap
             function animate() {
                 // draw a semi-transparent blue background for fade effect
-                ctx.fillStyle = 'rgba(0, 31, 63, 0.1)';
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 // draw the heatmap
