@@ -1,4 +1,4 @@
-<! DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <link rel="shortcut icon" href="dbicon.png" type="image/x-icon">
@@ -130,7 +130,7 @@
             
             <div id="social-links">
                 <a href="https://bsky.app/profile/dahery.bsky.social">BlueSky</a>
-                <a href="https://substack.com/@davidbehery? utm_campaign=unknown&utm_medium=web" >Substack</a>
+                <a href="https://substack.com/@davidbehery?utm_campaign=unknown&utm_medium=web">Substack</a>
                 <a href="mailto:davidbehery@g.harvard.edu">Email</a>
                 <a href="https://scholar.google.com/citations?user=0WcXy_wAAAAJ&hl=en&oi=ao">Google Scholar</a>
             </div>
@@ -143,7 +143,7 @@
             const canvas = document.getElementById('heatmap-canvas');
             
             // get context
-            const ctx = canvas. getContext('2d');
+            const ctx = canvas.getContext('2d');
             
             // Classic_16 Cubehelix palette from palettable
             const classic16Palette = [
@@ -168,7 +168,7 @@
             // set canvas size to match window size
             function resizeCanvas() {
                 canvas.width = window.innerWidth;
-                canvas.height = window. innerHeight;
+                canvas.height = window.innerHeight;
                 
                 // redraw blue background
                 ctx.fillStyle = '#001f3f';
@@ -176,7 +176,7 @@
                 
                 // recompute grid dimensions
                 cols = Math.ceil(canvas.width / gridSize);
-                rows = Math. ceil(canvas.height / gridSize);
+                rows = Math.ceil(canvas.height / gridSize);
                 
                 // a new grid with new dimensions
                 const newHeatmapData = Array(rows).fill().map(() => Array(cols).fill(0));
@@ -259,7 +259,7 @@
             function animate() {
                 // draw a semi-transparent blue background for fade effect
                 ctx.fillStyle = 'rgba(0, 31, 63, 0.1)';
-                ctx.fillRect(0, 0, canvas. width, canvas.height);
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
                 // draw the heatmap
                 for (let y = 0; y < rows; y++) {
@@ -281,7 +281,7 @@
                                     gridSize, 
                                     gridSize
                                 );
-                                ctx.globalAlpha = 1. 0;
+                                ctx.globalAlpha = 1.0;
                             }
                         }
                     }
