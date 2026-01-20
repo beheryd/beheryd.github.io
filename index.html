@@ -208,12 +208,12 @@
                 const mouseX = e.clientX;
                 const mouseY = e.clientY;
                 
-                // get center grid cell
+                // get center
                 const centerGridX = Math.floor(mouseX / gridSize);
                 const centerGridY = Math.floor(mouseY / gridSize);
                 
                 // radial impact - affect cells in a radius around the cursor
-                const radius = 8; // radius of impact in grid cells
+                const radius = 10; // radius of impact
                 
                 // loop through all cells in a square around the cursor
                 for (let dy = -radius; dy <= radius; dy++) {
@@ -221,7 +221,7 @@
                         const gridX = centerGridX + dx;
                         const gridY = centerGridY + dy;
                         
-                        // check if the cell is within the grid bounds
+                        // check if the cell is within the bounds
                         if (gridX >= 0 && gridX < cols && gridY >= 0 && gridY < rows) {
                             // calculate distance from cursor center (squared)
                             const distSquared = dx * dx + dy * dy;
