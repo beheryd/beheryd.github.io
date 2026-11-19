@@ -1,0 +1,9 @@
+# GitHub Pages builds this site with Jekyll.
+# Each file in _thoughts/ becomes one frame in the memory palace (see README).
+collections:
+  thoughts:
+    output: false
+
+exclude:
+  - README.md
+  - scripts/

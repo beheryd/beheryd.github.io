@@ -1,0 +1,27 @@
+---
+layout: null
+---
+{%- comment -%}
+  One entry per file in _thoughts/. The file name is the thought's id (its #link),
+  and a leading YYYY-MM-DD in the name is its date; a `date:` in front matter is
+  used only when the name has no date.
+{%- endcomment -%}
+{%- assign list = site.thoughts | where_exp: "t", "t.draft != true" -%}
+[
+{%- for t in list %}
+  {%- assign file = t.relative_path | split: "/" | last | replace: ".markdown", "" | replace: ".md", "" -%}
+  {%- assign stamp = file | slice: 0, 10 -%}
+  {%- assign year = stamp | slice: 0, 4 | plus: 0 -%}
+  {%- if year > 1900 and stamp.size == 10 -%}
+    {%- assign day = stamp -%}
+  {%- else -%}
+    {%- assign day = t.date | date: "%Y-%m-%d" -%}
+  {%- endif %}
+  {
+    "title": {{ t.title | jsonify }},
+    "date": {{ day | jsonify }},
+    "slug": {{ file | jsonify }},
+    "body": {{ t.content | markdownify | strip | jsonify }}
+  }{% unless forloop.last %},{% endunless %}
+{%- endfor %}
+]

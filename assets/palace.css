@@ -1,0 +1,498 @@
+/* ------------------------------------------------------------------
+   The memory palace — riso-pastel tunnel book
+   Geometry vars (--W, --H, --pw, --lh, --fh, --P, --title-size, …)
+   are set on #hall by palace.js on load and resize.
+   ------------------------------------------------------------------ */
+
+:root {
+    --font: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+            system-ui, -apple-system, "Segoe UI", sans-serif;
+
+    --ground: #5fae9e;
+    --ink: #2c2733;
+    --ink-soft: rgba(44, 39, 51, 0.62);
+    --misreg: rgba(214, 78, 74, 0.5);
+
+    --butter: #f4e48a;
+    --salmon: #e9a48f;
+    --mint:   #a8dcb4;
+    --peach:  #f1b97a;
+    --rose:   #e8a0a0;
+    --facade: #f6e9a0;
+    --paper:  #fbf3cf;
+
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background-color: var(--ground);
+    color: var(--ink);
+    font-family: var(--font);
+    font-weight: 300;
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
+}
+
+a { color: inherit; }
+
+:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 3px;
+}
+
+/* ---------- stage ---------- */
+
+#palace {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#hall { position: absolute; inset: 0; }
+
+.layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: calc(var(--W) * 1px);
+    height: calc(var(--H) * 1px);
+    transform-origin: 50% 50%;
+    pointer-events: none;
+}
+
+.layer > svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.layer .shadow { fill: var(--ink); opacity: 0.17; }
+/* the temple front and roof sit flat on the ground: no shadow onto the teal */
+.facade > svg .shadow, .pediment .shadow { display: none; }
+.layer .paper  { fill: var(--c); pointer-events: visiblePainted; cursor: pointer; transition: fill 0.25s ease; }
+/* the cream title band on each thought's lintel (same paper as the entrance plaque) */
+.layer .label  { fill: var(--paper); pointer-events: visiblePainted; cursor: pointer; }
+.layer .lines  { fill: none; stroke: var(--ink); stroke-width: 1; opacity: 0.5; vector-effect: non-scaling-stroke; }
+.layer .lines.faint { opacity: 0.22; }
+
+.frame:hover .paper { fill: var(--c-hi); }
+.facade .paper { cursor: default; }
+.facade:hover .paper { fill: var(--c); }
+
+/* riso misregistration on printed titles */
+.printed {
+    color: var(--ink);
+    text-shadow: 1.2px 0.9px 0 var(--misreg);
+}
+
+/* ---------- thought frames ---------- */
+
+.lintel-title {
+    position: absolute;
+    left: calc(var(--pw) * 1px + 12px);
+    right: calc(var(--pw) * 1px + 12px);
+    top: calc(var(--lh) * 0.3px);
+    height: calc(var(--lh) * 0.7px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+/* thought titles: centred, and revealed when you hover over their frame
+   (or when you've walked up to it). Touch screens have no hover, so they show all. */
+.thought-title {
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+.frame:hover .thought-title,
+.frame.is-here .thought-title { opacity: 1; }
+@media (hover: none) {
+    .thought-title { opacity: 1; }
+}
+
+.lintel-title .t {
+    font-size: calc(var(--title-size) * 1px);
+    font-weight: 600;
+    line-height: 1.18;
+    letter-spacing: 0.01em;
+    text-align: center;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-wrap: balance;               /* two even lines instead of one long + one stub */
+    max-width: 34em;
+}
+
+/* the date sits on the floor step, centred between its top edge and its
+   engraved line, so it keeps its place at any window height */
+.floor-date {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc((var(--H) - var(--fh)) * 1px);
+    height: calc(var(--fh) * 0.5px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--small-size) * 0.85px);
+    opacity: 0.6;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1;
+    pointer-events: none;
+}
+
+/* ---------- facade ---------- */
+
+.pediment {
+    position: absolute;
+    left: calc(var(--W) * -0.015px);
+    width: calc(var(--W) * 1.03px);
+    top: calc(var(--P) * -1px);
+    height: calc(var(--P) * 1px);
+    pointer-events: none;
+}
+
+.pediment svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.pediment .paper { fill: var(--paper); pointer-events: none; cursor: default; }   /* cream-white roof */
+/* recessed tympanum inside the roof */
+.pediment .tympanum { fill: var(--ink); opacity: 0.05; }
+
+/* dentils: a row of small blocks in the band under the roof, drifting left to right */
+.dentils {
+    --d: calc(var(--lh) * 0.11px);          /* block width */
+    --g: calc(var(--lh) * 0.07px);          /* gap */
+    --period: calc(var(--d) + var(--g));
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(var(--lh) * 0.16px);
+    height: calc(var(--lh) * 0.14px);
+    pointer-events: none;
+    background-image: repeating-linear-gradient(90deg,
+        rgba(44, 39, 51, 0.5) 0 1px,
+        rgba(44, 39, 51, 0.09) 1px calc(var(--d) - 1px),
+        rgba(44, 39, 51, 0.5) calc(var(--d) - 1px) var(--d),
+        transparent var(--d) var(--period));
+    background-size: var(--period) 85%;
+    background-repeat: repeat-x;
+    background-position: 0 0;
+    animation: dentils-drift 2.5s linear infinite;
+}
+
+@keyframes dentils-drift {
+    to { background-position: var(--period) 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dentils { animation: none; }
+}
+
+/* links across the temple front */
+/* centred in the open band between the cornice lines and the top of the entrance */
+.entablature {
+    top: calc(var(--lh) * 0.3px);
+    height: calc(var(--lh) * 0.7px);
+    cursor: default;
+    flex-wrap: wrap;
+    align-content: center;
+    gap: 2px calc(var(--pw) * 0.24px);
+}
+
+.entablature a {
+    font-size: calc(var(--link-size) * 1px);
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    text-decoration: none;
+    padding: 4px 0 3px;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+.entablature a:hover { border-bottom-color: var(--ink); }
+
+.narrow .entablature { gap: 0 14px; }
+.narrow .entablature a { letter-spacing: 0.12em; }
+
+.plaque {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--fh) * 0.55px);
+    width: min(25rem, calc(var(--W) * 1px - var(--pw) * 2px - 28px));
+    transform: translateX(-50%) rotate(-0.5deg);
+    background: var(--paper);
+    border: 1px solid var(--ink-soft);
+    box-shadow: 5px 8px 0 rgba(44, 39, 51, 0.18);
+    padding: 1rem 1.2rem 0.9rem;
+    pointer-events: auto;
+    cursor: default;
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+.plaque h1 {
+    font-size: clamp(1.05rem, 2.4vw, 1.35rem);
+    font-weight: 600;
+    margin-bottom: 0.3rem;
+}
+
+.plaque p {
+    font-size: clamp(0.82rem, 1.6vw, 0.95rem);
+    line-height: 1.55;
+}
+
+.plaque p a {
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+}
+.plaque p a:hover { background: rgba(44, 39, 51, 0.08); }
+
+.plaque button {
+    margin-top: 0.55rem;
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--ink);
+    padding: 0 0 1px;
+    cursor: pointer;
+}
+
+/* ---------- back wall ---------- */
+
+.backwall-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    box-shadow: 0 0 0 1px rgba(44, 39, 51, 0.5);
+    pointer-events: none;
+}
+
+/* ---------- screen-reader-only thought list ---------- */
+
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+/* ---------- reader card ---------- */
+
+#reader {
+    margin: auto;
+    border: none;
+    padding: 0;
+    background: transparent;
+    width: min(40rem, calc(100vw - 32px));
+    max-width: none;
+    max-height: calc(100dvh - 48px);
+    overflow: visible;
+    color: var(--ink);
+}
+
+#reader::backdrop {
+    background: rgba(38, 72, 66, 0.4);
+    -webkit-backdrop-filter: blur(3px);
+    backdrop-filter: blur(3px);
+}
+
+.card {
+    position: relative;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    background-color: color-mix(in srgb, var(--c, var(--butter)) 42%, #fffaf0);
+    background-image: var(--grain-img);
+    background-size: 220px;
+    border: 1px solid var(--ink-soft);
+    box-shadow: 7px 11px 0 rgba(44, 39, 51, 0.22);
+    padding: clamp(1.6rem, 5vw, 2.6rem) clamp(1.3rem, 5vw, 2.8rem);
+    transform: rotate(-0.4deg);
+    transform-origin: 50% 0;
+    animation: unfold 0.55s cubic-bezier(0.2, 0.8, 0.25, 1) both;
+}
+
+@keyframes unfold {
+    from { opacity: 0; transform: perspective(1000px) rotateX(-70deg) translateY(-24px) scale(0.94); }
+    60%  { opacity: 1; }
+    to   { opacity: 1; transform: perspective(1000px) rotateX(0) rotate(-0.4deg); }
+}
+
+.card-close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.8rem;
+    width: 2.2rem;
+    height: 2.2rem;
+    font: inherit;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--ink);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.card-meta {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.7rem;
+}
+.card-meta:empty { display: none; }
+
+#reader-title {
+    font-size: clamp(1.35rem, 3.6vw, 1.9rem);
+    font-weight: 600;
+    line-height: 1.25;
+    margin-bottom: 1.1rem;
+    padding-right: 1.5rem;
+    text-shadow: 1.5px 1px 0 var(--misreg);
+}
+
+.card-body {
+    font-size: clamp(0.95rem, 2vw, 1.05rem);
+    line-height: 1.75;
+    user-select: text;
+    -webkit-user-select: text;
+}
+.card-body > * + * { margin-top: 0.9em; }
+.card-body a { text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.card-body a:hover { background: rgba(44, 39, 51, 0.08); }
+.card-body blockquote { border-left: 2px solid var(--ink-soft); padding-left: 1em; font-style: italic; }
+.card-body ul, .card-body ol { padding-left: 1.3em; }
+.card-body code { font-size: 0.9em; background: rgba(44, 39, 51, 0.07); padding: 0 0.25em; }
+.card-body strong { font-weight: 600; }
+
+/* citations: a "References" heading in a note, or markdown footnotes ([^1]) */
+.card-body .card-refs,
+.card-body .footnotes,
+.card-body .footnote {
+    margin-top: 1.8rem;
+    padding-top: 0.9rem;
+    border-top: 1px dashed var(--ink-soft);
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+.card-body .footnote hr { display: none; }
+
+.card-refs-label,
+.card-body .footnotes::before,
+.card-body .footnote::before {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.6rem;
+}
+.card-body .footnotes::before,
+.card-body .footnote::before { content: "Notes"; }
+
+.card-refs ul,
+.card-refs ol { list-style: none; padding-left: 0; }
+.card-refs li + li,
+.card-refs p + p { margin-top: 0.55em; }
+.card-refs li,
+.card-refs p:not(.card-refs-label) { padding-left: 1.6em; text-indent: -1.6em; }   /* hanging indent */
+
+.card-body .footnotes ol,
+.card-body .footnote ol { padding-left: 1.3em; }
+.card-body .footnotes li + li,
+.card-body .footnote li + li { margin-top: 0.45em; }
+.card-body sup a { text-decoration: none; font-weight: 600; padding: 0 0.1em; }
+.card-body a.reversefootnote,
+.card-body a.footnote-backref { text-decoration: none; }
+
+.card-reply {
+    margin-top: 1.8rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--ink-soft);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.5rem 1.2rem;
+}
+.card-reply[hidden] { display: none; }
+
+.card-reply p {
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: var(--ink-soft);
+}
+
+.card-reply a {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--ink);
+    padding-bottom: 1px;
+}
+.card-reply a::after { content: " →"; }
+.card-reply a:hover { background: rgba(44, 39, 51, 0.08); }
+
+/* ---------- grain ---------- */
+
+:root {
+    --grain-img: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.17  0 0 0 0 0.15  0 0 0 0 0.2  0 0 0 0.5 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+}
+
+#grain {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    pointer-events: none;
+    background-image: var(--grain-img);
+    background-size: 220px;
+    opacity: 0.45;
+    mix-blend-mode: multiply;
+}
+
+/* ---------- misc ---------- */
+
+.noscript {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    padding: 2rem;
+    background: var(--ground);
+    line-height: 1.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .card { animation: none; }
+    .layer .paper { transition: none; }
+}
+
+/* frames you've just walked past shouldn't catch clicks */
+.layer.ghost * { pointer-events: none !important; }
+.card:focus { outline: none; }
