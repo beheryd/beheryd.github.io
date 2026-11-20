@@ -11,8 +11,6 @@
     const PALETTE = ['#f4e48a', '#e9a48f', '#a8dcb4', '#f1b97a', '#e8a0a0'];
     const FACADE_COLOR = '#f6e9a0';
     const BACKWALL_COLOR = '#fbf3cf';
-    // inks for the back-wall visualizer: the paper colors plus the teal ground
-    const INKS = ['#e9a48f', '#a8dcb4', '#f1b97a', '#e8a0a0', '#f4e48a', '#8ccabb'];
 
     const FOCAL = 900;                 // perspective focal length (world units)
     const STEP = FOCAL * 0.2;          // depth between frames — keeps the tunnel closed
@@ -188,9 +186,8 @@
             </svg>`;
     }
 
-    /* The back wall: risograph-style ink circles drifting and overprinting
-       (multiply), over faint outlines that keep flowing deeper into the hall. */
-    const viz = { canvas: null, ctx: null, w: 0, h: 0, blobs: [] };
+    /* The back wall: faint outlines that keep flowing deeper into the hall. */
+    const viz = { canvas: null, ctx: null, w: 0, h: 0 };
 
     function sizeVisualizer() {
         if (!viz.canvas) return;
@@ -199,20 +196,7 @@
         viz.h = viz.canvas.height = Math.round(geo.H * q);
     }
 
-    function seedVisualizer() {
-        const rnd = (a, b) => a + Math.random() * (b - a);
-        viz.blobs = INKS.map((color) => ({
-            color,
-            r: rnd(0.18, 0.3),                         // radius, × wall height
-            ax: rnd(0.2, 0.36), ay: rnd(0.14, 0.3),   // orbit size, × wall size
-            wx: rnd(0.12, 0.3) * (Math.random() < 0.5 ? -1 : 1),
-            wy: rnd(0.1, 0.26),
-            px: rnd(0, Math.PI * 2), py: rnd(0, Math.PI * 2),
-            depth: rnd(0.4, 1.3),                      // how much it leans toward the cursor
-        }));
-    }
-
-    function drawVisualizer(now, mx, my) {
+    function drawVisualizer(now) {
         const { ctx, w, h } = viz;
         if (!ctx) return;
         const t = reduceMotion.matches ? 9 : now / 1000;
@@ -233,19 +217,6 @@
             ctx.strokeRect((w - w * e) / 2, (h - h * e) / 2, w * e, h * e);
         }
 
-        // overprinting inks
-        ctx.globalCompositeOperation = 'multiply';
-        ctx.globalAlpha = 0.62;                        // light overprint, so overlaps stay pastel
-        for (const b of viz.blobs) {
-            const x = w / 2 + Math.sin(t * b.wx + b.px) * b.ax * w + mx * b.depth * w * 0.07;
-            const y = h / 2 + Math.cos(t * b.wy + b.py) * b.ay * h + my * b.depth * h * 0.07;
-            const r = m * b.r * (1 + 0.08 * Math.sin(t * 0.45 + b.px));
-            ctx.fillStyle = b.color;
-            ctx.beginPath();
-            ctx.arc(x, y, r, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.globalAlpha = 1;
     }
 
     /* ---------------- building the hall ---------------- */
@@ -347,7 +318,6 @@
         viz.ctx = viz.canvas.getContext('2d');
         L.el.appendChild(viz.canvas);
         sizeVisualizer();
-        seedVisualizer();
         return L;
     }
 
@@ -441,7 +411,7 @@
             }
 
             if (L.kind === 'backwall' && (!still || !L.drawn)) {
-                drawVisualizer(now, L.mx, L.my);
+                drawVisualizer(now);
                 L.drawn = true;
             }
         }
