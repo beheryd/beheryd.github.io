@@ -313,8 +313,9 @@
 
     function updateHint() {
         if (!viz.hint) return;
-        const [text, arrow] = hasMouse ? ['Scroll to walk in', '↓'] : ['Swipe up to walk in', '↑'];
-        viz.hint.firstChild.textContent = text;
+        // one span per line, so narrow walls never get an awkward break
+        const [lines, arrow] = hasMouse ? [['Scroll to walk in'], '↓'] : [['Swipe up', 'to walk in'], '↑'];
+        viz.hint.firstChild.replaceChildren(...lines.map((line) => el('span', '', line)));
         viz.hint.lastChild.textContent = arrow;
     }
 
