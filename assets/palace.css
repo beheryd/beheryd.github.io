@@ -110,16 +110,18 @@ a { color: inherit; }
     cursor: pointer;
 }
 
-/* thought titles: centred, and revealed when you hover over their frame
-   (or when you've walked up to it). Touch screens have no hover, so they show all. */
+/* thought titles: centred, and revealed when you've walked up to their frame,
+   or (with a mouse) when you hover over it. Touch screens have no real hover,
+   and a tap leaves a "sticky" :hover behind, so only the frame you're at shows
+   its title there; showing them all let titles of frames further back peek out
+   from behind the ones in front. */
 .thought-title {
     opacity: 0;
     transition: opacity 0.35s ease;
 }
-.frame:hover .thought-title,
 .frame.is-here .thought-title { opacity: 1; }
-@media (hover: none) {
-    .thought-title { opacity: 1; }
+@media (hover: hover) and (pointer: fine) {
+    .frame:hover .thought-title { opacity: 1; }
 }
 
 .lintel-title .t {
