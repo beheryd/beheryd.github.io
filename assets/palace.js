@@ -311,6 +311,14 @@
         return L;
     }
 
+    function updateHint() {
+        if (!viz.hint) return;
+        // one span per line, so narrow walls never get an awkward break
+        const [lines, arrow] = hasMouse ? [['Scroll to walk in'], '↓'] : [['Swipe up', 'to walk in'], '↑'];
+        viz.hint.firstChild.replaceChildren(...lines.map((line) => el('span', '', line)));
+        viz.hint.lastChild.textContent = arrow;
+    }
+
     function buildBackwall() {
         const L = addLayer('backwall', (thoughts.length + 1) * STEP, BACKWALL_COLOR);
         viz.canvas = el('canvas', 'backwall-canvas');
@@ -318,6 +326,13 @@
         viz.ctx = viz.canvas.getContext('2d');
         L.el.appendChild(viz.canvas);
         sizeVisualizer();
+
+        // a hint on the wall, seen through the entrance, that fades once you start walking
+        viz.hint = el('p', 'walk-hint');
+        viz.hint.setAttribute('aria-hidden', 'true');
+        viz.hint.append(el('span', 'walk-hint-text'), el('span', 'walk-hint-arrow'));
+        updateHint();
+        L.el.appendChild(viz.hint);
         return L;
     }
 
@@ -410,6 +425,14 @@
                 L.lastOpacity = opR;
             }
 
+            if (L.kind === 'backwall' && viz.hint) {
+                // counter the wall's scale so the hint keeps a readable size on screen
+                const inv = (1 / s).toFixed(3);
+                if (inv !== L.lastInv) { L.el.style.setProperty('--inv-s', inv); L.lastInv = inv; }
+                const hintOp = clamp(1 - camZ / (STEP * 0.5), 0, 1).toFixed(2);
+                if (hintOp !== L.lastHintOp) { viz.hint.style.opacity = hintOp; L.lastHintOp = hintOp; }
+            }
+
             if (L.kind === 'backwall' && (!still || !L.drawn)) {
                 drawVisualizer(now);
                 L.drawn = true;
@@ -465,7 +488,8 @@
     });
     window.addEventListener('pointermove', (e) => {
         if (e.pointerType === 'mouse') {
-            hasMouse = true;
+            // browsers can send a synthetic, motionless mouse event on touch screens; only real motion counts
+            if (!hasMouse && (e.movementX || e.movementY)) { hasMouse = true; updateHint(); }
             // follow the cursor only while it is over the palace; outside, ease back to rest
             const { cx, cy, W, H, P } = geo;
             const top = cy - H / 2 - P, bottom = cy + H / 2;
